@@ -15,6 +15,14 @@ app = Flask(__name__, instance_relative_config=True)
 #app.config["DEBUG"] = True
 #DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
+todos_store={}
+
+todos_store['aakash']= ['study','coding','eating']
+
+todos_store['raj']= ['music','dance','belle']
+todos_store['shivang']= ['sing','read']
+    
+todos_store['ram']= ['code','code']
 def init():
     print("flask initialised")
 
@@ -24,35 +32,74 @@ def todo_view(todos):
     
     for todo in todos:
         todo_list+=(todo+ '<br>')
+    todo_list+='LIST END HERE'
     return todo_list
    # return 'aaaa'
-def get_todos_by_name(name):
-    if name=='aakash':
-        return ['study','coding','eating']
-    elif name=='raj':
-        return ['music','dance','belle']
 
-    elif name=='shivang':
-        return ['sing','read']
-    elif name=='ram':
-        return ['code','code']
-    else:
-        return []
+def select_todos(name):#model
+    global todos_store
+    return todos_store[name]
+
+def add_todo_db(name,todo):#model
+    todos_list=todos_store[name]
+    todos_list.append(todo)
+    todos_store[name]=todos_list
+    my_todos=todos_store[name]
+    return 
+
+def add_todos_by_name(name,todo):#model
+    #add data to db
+    my_todos=add_todo_db(name,todo)
+    return 
+
+def get_todos_by_name(name):
+    try:
+        return select_todos(name)
+    except:
+        return None
+   # render_template('404.html',name=name)
+
+
+#def get_todos_by_name(name):
+#    if name=='aakash':
+#        return ['study','coding','eating']
+#    elif name=='raj':
+#        return ['music','dance','belle']
+
+#    elif name=='shivang':
+#        return ['sing','read']
+#    elif name=='ram':
+#       return ['code','code']
+#    else:
+#        return []
 
 
 #http://127.0.0.1:5000/todos?name=aakash
 @app.route('/todos')
-def todos():
+def todos():#controller
     name=request.args.get('name')
     print('------------')
     print(name)
     print('------------')
 
     my_todos=get_todos_by_name(name)    
-
-    return todo_view(my_todos)
+    
+    #todo_view(my_todos)
+    if my_todos == None:
+        return render_template('404.html',name=name),404  
+    else:
+        return render_template('todo_view.html',todos=my_todos)
    # return 'aaa'
 
+
+# wget http://127.0.0.1:5000/add_todos\?name\=raj\&todo\=play_cricket
+
+@app.route('/add_todos')
+def add_todos():
+    name=request.args.get('name')
+    todo=request.args.get('todo')
+    add_todos_by_name(name,todo)
+    return 'added sucessfully'
 
 @app.route('/aakash')
 def index():       
